@@ -1,0 +1,79 @@
+{% liquid
+  if item.id
+    assign path = 'update'
+  else
+    assign path = 'create'
+  endif
+  assign uuid = '' | uuid
+  assign item_uuid = item.uuid | default: uuid
+%}
+
+<div class="container flex flex-wrap items-center mx-auto">
+  <form action="/dashboard/items/{{ path }}" method="post">
+    {% include 'authenticity_token' %}
+
+    {% if item.id %}
+    <input type="hidden" name="item[id]" value="{{ item.id }}" />
+    {% endif %}
+    <input type="hidden" name="item[uuid]" value="{{ item_uuid }}" />
+
+    <div class="my-3">
+      <label class="block" for="name">{{ 'app.items.form.name' | t }}</label>
+      <input class="w-2/3 form-input" type="text" id="name" name="item[name]" value="{{ item.name }}" autofocus required />
+      {% include 'theme/simple/field_error', errors: object.errors.name %}
+    </div>
+
+    <div class="mt-3">
+      <label class="block">{{ 'app.items.form.photos' | t }}</label>
+      {% include 'theme/simple/photos/uppy_area' %}
+    </div>
+
+    <div class="mt-3">
+      <label class="block" for="category">{{ 'app.items.form.category' | t }}</label>
+      <select class="form-select" id="category" name="item[category]">
+        {% for category in lib.categories %}
+          {% assign ident = category | split: '/' | size | minus: 1 | times: 2 %}
+          <option value="{{ category }}" {% if item.category == category %}selected{% endif %}>
+              {% for step in (1..ident) %} {% print "&nbsp;" %} {% endfor %}
+              {{ 'categories.' | append: category | t }}
+          </option>
+        {% endfor %}
+      </select>
+
+      {% include 'theme/simple/field_error', errors: object.errors.category %}
+    </div>
+
+    <div class="mt-3">
+      <label class="block" for="description">{{ 'app.items.form.description' | t }}</label>
+      <textarea class="w-full form-input" type="text" id="description" name="item[description]" rows="3" required>{{ item.description }}</textarea>
+
+      {% include 'theme/simple/field_error', errors: object.errors.description %}
+    </div>
+
+
+    {% comment %}
+    <div class="mt-3">
+      <label class="block" for="tags">Tags</label>
+      <input class="w-full form-input" type="text" id="tags" name="item[tags]" value="{{ item.tags | join: ',' }}" />
+      {% if item.errors.tags %}
+      <span class="text-red-800">{{ item.errors.tags }}</span>
+      {% endif %}
+    </div>
+    {% endcomment %}
+
+    <div class="mt-3">
+      <label class="block" for="price">{{ 'app.items.form.price' | t }}</label>
+      <!-- TODO: Add currency prefix $[input]  -->
+      <input class="w-32 form-input" type="number" id="price" name="item[price]"
+        value="{{ item.price | default: 1000 | pricify_cents | replace_regex: '[\$\,]', '' }}" />
+      {% include 'theme/simple/field_error', errors: object.errors.price %}
+    </div>
+
+    <button class="mt-8 button" value="{{ path }}">{{ 'app.items.form.submit' | t }}</button>
+  </form>
+
+</div>
+{% liquid
+  assign photos = photos | default: item.photos
+  render 'theme/simple/photos/uppy_form', object_uuid: item_uuid, presigned_url: presigned_url, user_id: user.id, photo_type: 'photo', note: 'Images only, up to 3 files, 2MB each', max_number_of_files: 3, existing_photos: photos
+%}
