@@ -39,8 +39,14 @@
 
         <div class="mb-6">
           <label class="block mb-2 cursor-pointer" for="last-name">{{ 'app.profiles.last_name' | t }}</label>
-          <input id="last-name" name="profile[last_name]" value="{{ object.last_name }}" type="text" maxlength="45" class="w-full form-input"  autocomplete="family-name">
+          <input id="last-name" name="profile[last_name]" value="{{ object.last_name }}" type="text" maxlength="45" class="w-full form-input" autocomplete="family-name">
           {% render 'theme/simple/field_error', errors: object.errors.last_name %}
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-2 cursor-pointer" for="date-of-birth">{{ 'app.profiles.date_of_birth' | t }}</label>
+          <input id="date-of-birth" name="profile[date_of_birth]" value="{{ object.date_of_birth }}" type="date" min="1900-01-01" max="2022-01-01" class="w-full form-input" >
+          {% render 'theme/simple/field_error', errors: object.errors.date_of_birth %}
         </div>
       </div>
 
